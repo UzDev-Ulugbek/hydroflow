@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HydroFlow — Tokenizing Hydration | Solana Splash</title>
+<meta name="description" content="HydroFlow — the world's first tokenized energy drink. Zero sugar, blockchain-powered. Scan the QR on every can to earn $HYDRO on Solana." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --white:#ffffff;
+  --off-white:#f5f5f5;
+  --light-gray:#fafafa;
+  --dark:#0a0a0a;
+  --dark2:#111111;
+  --dark3:#1a1a1a;
+  --body-text:#333333;
+  --muted:#888888;
+  --border:#e5e5e5;
+  --cyan:#00cfff;
+  --cyan-dark:#0099cc;
+  --gold:#f5c842;
+
+  --pad-y:140px;
+  --pad-y-tablet:80px;
+  --pad-y-mobile:60px;
+  --pad-x:5%;
+
+  --r-sm:2px;
+  --r-md:4px;
+  --r-lg:8px;
+
+  --nav-h:68px;
+
+  --ff-display:'Bebas Neue', sans-serif;
+  --ff-body:'Inter', sans-serif;
+  --ff-mono:'Space Mono', monospace;
+
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ===================== RESET ===================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:var(--ff-body);
+  font-weight:300;
+  color:var(--body-text);
+  background:var(--white);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+img{display:block;max-width:100%;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+
+/* ===================== HELPERS ===================== */
+.wrap{max-width:1100px;margin:0 auto;}
+.section{padding:var(--pad-y) var(--pad-x);}
+.eyebrow{
+  font-family:var(--ff-mono);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color:var(--cyan);
+  margin-bottom:20px;
+  display:block;
+}
+.h-lead{
+  font-family:var(--ff-display);
+  line-height:1;
+  letter-spacing:1px;
+  color:var(--dark);
+}
+.accent{color:var(--cyan);}
+
+/* ===================== SCROLL PROGRESS ===================== */
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0;
+  background:var(--cyan);
+  z-index:200;
+  transition:width 0.05s linear;
+}
+
+/* ===================== NAV ===================== */
+#nav{
+  position:fixed;top:0;left:0;width:100%;height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--pad-x);
+  z-index:100;
+  transition:background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+  border-bottom:1px solid transparent;
+}
+#nav.scrolled{
+  background:rgba(255,255,255,0.95);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:var(--ff-display);
+  font-size:28px;
+  letter-spacing:3px;
+  line-height:1;
+}
+.logo .b1{color:var(--white);transition:color 0.3s ease;}
+.logo .b2{color:var(--cyan);}
+#nav.scrolled .logo .b1{color:var(--dark);}
+
+.nav-links{display:flex;gap:30px;align-items:center;}
+.nav-links a{
+  font-family:var(--ff-body);
+  font-size:13px;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--white);
+  position:relative;
+  transition:color 0.3s ease;
+  padding-bottom:2px;
+}
+#nav.scrolled .nav-links a{color:var(--dark);}
+.nav-links a::after{
+  content:"";position:absolute;left:0;bottom:-2px;height:1px;width:0;
+  background:var(--cyan);
+  transition:width 0.25s ease;
+}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%;}
+.nav-links a:hover,.nav-links a.active{color:var(--cyan);}
+
+.btn-buy{
+  border:1px solid var(--white);
+  color:var(--white);
+  background:transparent;
+  border-radius:var(--r-sm);
+  padding:10px 24px;
+  text-transform:uppercase;
+  font-family:var(--ff-body);
+  font-size:12px;letter-spacing:0.06em;
+  transition:all 0.2s ease, color 0.3s ease, border-color 0.3s ease;
+}
+#nav.scrolled .btn-buy{border-color:var(--dark);color:var(--dark);}
+.btn-buy:hover{background:var(--cyan);border-color:var(--cyan);color:var(--dark);}
+
+/* hamburger */
+.hamburger{display:none;flex-direction:column;justify-content:space-between;width:22px;height:16px;}
+.hamburger span{display:block;height:2px;width:100%;background:var(--white);transition:background 0.3s ease, transform 0.3s ease, opacity 0.3s ease;}
+#nav.scrolled .hamburger span{background:var(--dark);}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+#mobile-menu{
+  position:fixed;top:var(--nav-h);left:0;width:100%;
+  background:rgba(255,255,255,0.98);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  overflow:hidden;max-height:0;
+  transition:max-height 0.4s ease;
+  z-index:99;
+  border-bottom:1px solid var(--border);
+}
+#mobile-menu.open{max-height:340px;}
+#mobile-menu a{
+  display:block;padding:16px var(--pad-x);
+  color:var(--dark);font-size:14px;text-transform:uppercase;letter-spacing:0.06em;
+  border-bottom:1px solid var(--border);
+}
+#mobile-menu a:hover{color:var(--cyan);}
+
+/* ===================== HERO ===================== */
+#hero{
+  position:relative;height:100vh;min-height:640px;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;overflow:hidden;
+}
+#hero .bg{
+  position:absolute;inset:0;
+  background-image:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1600&q=80');
+  background-size:cover;background-position:center;background-attachment:fixed;
+  will-change:background-position;
+  z-index:0;
+}
+#hero .overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.6) 100%);
+}
+.hero-content{position:relative;z-index:2;max-width:1100px;padding:0 var(--pad-x);width:100%;}
+
+.hero-eyebrow{
+  font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;
+  letter-spacing:0.22em;color:rgba(255,255,255,0.75);
+  opacity:0;transform:translateY(10px);
+  animation:fadeUp 0.6s ease 0.3s forwards;
+}
+.hero-title{margin:18px 0 0;}
+.hero-title .line1{
+  font-family:var(--ff-display);
+  font-size:clamp(80px,13vw,150px);
+  color:var(--white);letter-spacing:4px;line-height:0.9;
+  opacity:0;transform:translateY(60px);
+  animation:slideUp 0.9s var(--ease-out) 0.2s forwards;
+}
+.hero-title .line2{
+  display:block;
+  font-family:var(--ff-display);
+  font-size:clamp(28px,4vw,48px);
+  color:rgba(255,255,255,0.6);letter-spacing:10px;line-height:1;
+  margin-top:6px;
+  opacity:0;transform:translateY(40px);
+  animation:slideUp 0.9s var(--ease-out) 0.4s forwards;
+}
+.hero-divider{
+  height:1px;width:0;background:var(--cyan);margin:28px auto;
+  animation:drawLine 0.5s ease 0.6s forwards;
+}
+.hero-sub{
+  font-family:var(--ff-body);font-size:16px;font-weight:300;
+  color:rgba(255,255,255,0.8);letter-spacing:0.1em;text-transform:uppercase;
+  opacity:0;animation:fade 0.6s ease 0.8s forwards;
+}
+.hero-cta{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:32px;
+  opacity:0;transform:translateY(16px);
+  animation:fadeUp 0.6s ease 1.0s forwards;
+}
+.btn{
+  font-family:var(--ff-body);font-size:12px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.1em;
+  border-radius:var(--r-sm);padding:14px 38px;
+  transition:all 0.2s ease;
+}
+.btn-primary{background:var(--cyan);color:var(--dark);border:1px solid var(--cyan);}
+.btn-primary:hover{background:#33d9ff;border-color:#33d9ff;transform:translateY(-2px);}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.5);color:var(--white);}
+.btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,0.08);transform:translateY(-2px);}
+.btn-ghost-dark{background:transparent;border:1px solid var(--dark);color:var(--dark);}
+.btn-ghost-dark:hover{background:var(--dark);color:var(--white);transform:translateY(-2px);}
+
+.partners{
+  display:flex;justify-content:center;align-items:center;gap:36px;flex-wrap:wrap;
+  margin-top:64px;padding-top:40px;border-top:1px solid rgba(255,255,255,0.12);
+  opacity:0;animation:fade 0.5s ease 1.2s forwards;
+}
+.partners img{height:28px;filter:brightness(0) invert(1);opacity:0.6;transition:opacity 0.2s ease;}
+.partners img:hover{opacity:1;}
+
+.scroll-ind{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  z-index:2;width:18px;height:18px;
+  border-right:2px solid rgba(255,255,255,0.4);
+  border-bottom:2px solid rgba(255,255,255,0.4);
+  transform-origin:center;
+  animation:bounce 1.5s ease-in-out infinite;
+  opacity:0;
+}
+.scroll-ind.show{opacity:1;animation:bounce 1.5s ease-in-out infinite, fade 0.6s ease 1.4s forwards;}
+.scroll-ind.hide{opacity:0;transition:opacity 0.3s ease;}
+
+/* ===================== MARQUEE ===================== */
+.marquee{
+  background:var(--off-white);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:16px 0;overflow:hidden;position:relative;
+}
+.marquee::before,.marquee::after{
+  content:"";position:absolute;top:0;bottom:0;width:120px;z-index:2;pointer-events:none;
+}
+.marquee::before{left:0;background:linear-gradient(to right,var(--off-white),transparent);}
+.marquee::after{right:0;background:linear-gradient(to left,var(--off-white),transparent);}
+.strip-track{
+  display:flex;white-space:nowrap;width:max-content;
+  animation:marquee 22s linear infinite;
+}
+.strip-track:hover{animation-play-state:paused;}
+.strip-item{
+  font-family:var(--ff-mono);font-size:10px;color:#aaa;
+  text-transform:uppercase;letter-spacing:0.14em;
+  display:inline-flex;align-items:center;padding:0 4px;
+}
+.strip-item::after{
+  content:"";display:inline-block;width:3px;height:3px;border-radius:50%;
+  background:var(--cyan);margin:0 18px;
+}
+
+/* ===================== PRODUCT ===================== */
+#product{
+  position:relative;overflow:hidden;
+  padding:var(--pad-y) var(--pad-x);
+}
+#product .bg{
+  position:absolute;inset:0;z-index:0;
+  background-image:url('https://images.unsplash.com/photo-1559825481-12a05cc00344?w=1600&q=80');
+  background-size:cover;background-position:center;background-attachment:fixed;
+  will-change:background-position;
+}
+#product .overlay{position:absolute;inset:0;z-index:1;background:rgba(0,0,0,0.6);}
+#product .wrap{position:relative;z-index:2;}
+.product-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.product-text .eyebrow{color:rgba(255,255,255,0.6);}
+.product-text h2{
+  font-family:var(--ff-display);font-size:clamp(48px,7vw,88px);
+  color:var(--white);line-height:0.95;letter-spacing:1px;margin-bottom:24px;
+}
+.product-text p{
+  font-family:var(--ff-body);font-size:15px;font-weight:300;
+  color:rgba(255,255,255,0.7);line-height:1.85;margin-bottom:28px;
+}
+.ingredients{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--r-md);padding:20px 24px;
+}
+.ingredients .lbl{
+  font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,0.4);
+  text-transform:uppercase;letter-spacing:0.16em;margin-bottom:12px;display:block;
+}
+.tags{display:flex;flex-wrap:wrap;gap:8px;}
+.tag{
+  background:rgba(0,207,255,0.1);border:1px solid rgba(0,207,255,0.25);
+  color:var(--cyan);font-family:var(--ff-mono);font-size:10px;
+  padding:5px 14px;border-radius:var(--r-sm);
+}
+
+/* CSS CAN */
+.can-col{display:flex;flex-direction:column;align-items:center;}
+.can-wrap{animation:float 6s ease-in-out infinite;transition:filter 0.3s ease;}
+.can-wrap:hover{animation-duration:2s;}
+.can-cap{
+  width:175px;height:22px;border-radius:50%;
+  background:linear-gradient(180deg,#1a2535,#0d1520);
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  position:relative;z-index:2;
+}
+.can-cap.bottom{margin-top:-11px;z-index:1;}
+.can-body{
+  width:175px;height:350px;border-radius:32px;margin-top:-11px;
+  background:linear-gradient(160deg,#0c1422 0%,#0f1d30 25%,#081018 50%,#0c1422 75%,#0a1220 100%);
+  border:1px solid rgba(0,207,255,0.2);
+  box-shadow:0 0 80px rgba(0,207,255,0.1), 0 40px 80px rgba(0,0,0,0.7),
+             inset 1px 0 0 rgba(255,255,255,0.06), inset -1px 0 0 rgba(0,0,0,0.3);
+  position:relative;overflow:hidden;
+  transition:box-shadow 0.3s ease;
+}
+.can-wrap:hover .can-body{box-shadow:0 0 120px rgba(0,207,255,0.25), 0 40px 90px rgba(0,0,0,0.7),
+             inset 1px 0 0 rgba(255,255,255,0.08), inset -1px 0 0 rgba(0,0,0,0.3);}
+.can-body::before{
+  content:"";position:absolute;top:0;bottom:0;left:20px;width:2px;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,0.12),transparent);
+}
+.can-body::after{
+  content:"";position:absolute;top:0;bottom:0;right:14px;width:6px;
+  background:linear-gradient(to bottom,transparent,rgba(0,207,255,0.18),transparent);
+  filter:blur(2px);
+}
+.can-label{
+  position:absolute;inset:20px 12px;border-radius:24px;
+  border:1px solid rgba(0,207,255,0.1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+}
+.can-label .brand{
+  font-family:var(--ff-display);font-size:36px;color:var(--cyan);letter-spacing:2px;
+  text-shadow:0 0 30px rgba(0,207,255,0.5), 0 0 60px rgba(0,207,255,0.2);
+}
+.can-label .sub{
+  font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;letter-spacing:0.14em;
+}
+.can-label .line{width:44px;height:1px;background:var(--cyan);margin:4px 0;opacity:0.7;}
+.can-label .vol{font-family:var(--ff-mono);font-size:10px;color:var(--gold);}
+.qr{
+  width:42px;height:42px;margin-top:10px;border-radius:3px;
+  border:1px solid rgba(0,207,255,0.25);
+  background:repeating-linear-gradient(0deg,rgba(0,207,255,0.45) 0,rgba(0,207,255,0.45) 1.5px,transparent 1.5px,transparent 3.5px);
+}
+.can-shadow{
+  width:100px;height:16px;border-radius:50%;
+  background:rgba(0,207,255,0.06);filter:blur(12px);margin:24px auto 0;
+}
+
+/* ===================== ABOUT ===================== */
+#about{background:var(--white);border-top:1px solid var(--border);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.about-text h2{
+  font-family:var(--ff-display);font-size:clamp(42px,5.5vw,72px);
+  color:var(--dark);line-height:1;letter-spacing:1px;margin-bottom:24px;
+}
+.about-text p{
+  font-family:var(--ff-body);font-size:15px;font-weight:300;
+  color:#555;line-height:1.85;margin-bottom:18px;
+}
+.about-img{
+  width:100%;height:280px;border-radius:6px;border:1px solid var(--border);
+  background:linear-gradient(135deg,#e8f4fd,#d0eaf8);
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+}
+.about-img span{
+  font-family:var(--ff-display);font-size:clamp(48px,7vw,88px);
+  color:rgba(0,207,255,0.22);letter-spacing:4px;
+}
+.scan-card{
+  margin-top:24px;background:var(--dark);padding:28px;border-radius:var(--r-md);
+  display:flex;justify-content:space-between;align-items:center;gap:20px;
+}
+.scan-card .scan-txt{font-family:var(--ff-display);font-size:32px;color:var(--white);line-height:1;letter-spacing:1px;}
+.scan-card .scan-txt span{display:block;color:var(--cyan);}
+.scan-card a{
+  border:1px solid rgba(255,255,255,0.2);color:var(--white);
+  border-radius:var(--r-sm);padding:10px 22px;text-transform:uppercase;font-size:11px;
+  white-space:nowrap;transition:all 0.2s ease;
+}
+.scan-card a:hover{background:var(--white);color:var(--dark);}
+
+/* ===================== TOKENOMICS ===================== */
+#tokenomics{background:var(--off-white);border-top:1px solid var(--border);}
+.token-head{text-align:center;margin-bottom:48px;}
+.token-head h2{font-family:var(--ff-display);font-size:clamp(40px,5vw,68px);color:var(--dark);letter-spacing:1px;}
+.token-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;margin-bottom:48px;
+}
+.token-cell{background:var(--white);padding:40px 24px;text-align:center;transition:background 0.2s ease;}
+.token-cell:hover{background:#f9f9f9;}
+.token-cell .pct{font-family:var(--ff-display);font-size:64px;line-height:1;margin-bottom:10px;}
+.token-cell .name{font-family:var(--ff-body);font-size:12px;font-weight:600;color:var(--dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.token-cell .desc{font-family:var(--ff-body);font-size:11px;color:var(--muted);line-height:1.5;}
+.chain-pills{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+.chain-pills .pill{
+  background:var(--white);border:1px solid var(--border);border-radius:3px;
+  padding:10px 20px;font-family:var(--ff-mono);font-size:11px;color:#666;
+  transition:all 0.2s ease;
+}
+.chain-pills .pill:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ===================== ROADMAP ===================== */
+#roadmap{background:var(--white);border-top:1px solid var(--border);}
+#roadmap .wrap{max-width:1000px;}
+.road-head{margin-bottom:56px;}
+.road-head h2{font-family:var(--ff-display);font-size:clamp(40px,5vw,68px);color:var(--dark);letter-spacing:1px;}
+.timeline{padding-left:48px;position:relative;}
+.timeline-line-bg{position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--border);}
+.timeline-line{position:absolute;left:6px;top:0;width:1px;height:0;background:linear-gradient(to bottom,var(--cyan),rgba(0,207,255,0.05));}
+.milestone{position:relative;margin-bottom:56px;}
+.milestone:last-child{margin-bottom:0;}
+.dot{position:absolute;left:-42px;top:4px;width:14px;height:14px;border-radius:50%;}
+.dot.done{background:var(--cyan);border:2px solid var(--cyan);}
+.dot.current{background:#fff;border:2px solid var(--cyan);box-shadow:0 0 0 4px rgba(0,207,255,0.15),0 0 14px rgba(0,207,255,0.4);animation:pulse 2s ease-out infinite;}
+.dot.upcoming{background:#fff;border:2px solid #ddd;}
+.milestone .phase{font-family:var(--ff-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:8px;display:block;}
+.milestone.done .phase,.milestone.current .phase{color:var(--cyan);}
+.milestone.upcoming .phase{color:#aaa;}
+.milestone h3{font-family:var(--ff-body);font-size:20px;font-weight:600;color:var(--dark);margin-bottom:10px;}
+.milestone p{font-family:var(--ff-body);font-size:14px;font-weight:300;color:#666;line-height:1.8;max-width:540px;margin-bottom:14px;}
+.m-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.m-tag{font-family:var(--ff-mono);font-size:9px;padding:4px 10px;border-radius:var(--r-sm);background:rgba(0,207,255,0.06);border:1px solid rgba(0,207,255,0.2);color:var(--cyan);text-transform:uppercase;letter-spacing:0.06em;}
+.milestone.done .m-tag{background:var(--cyan);color:var(--dark);border-color:var(--cyan);}
+
+/* ===================== TESTIMONIALS ===================== */
+#testimonials{background:var(--off-white);border-top:1px solid var(--border);}
+.test-head{text-align:center;margin-bottom:48px;}
+.test-head h2{font-family:var(--ff-display);font-size:clamp(40px,5vw,68px);color:var(--dark);letter-spacing:1px;}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.test-card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:32px;transition:transform 0.3s ease, box-shadow 0.3s ease;
+}
+.test-card:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(0,0,0,0.1);}
+.stars{color:var(--gold);font-size:13px;letter-spacing:3px;margin-bottom:18px;}
+.test-card blockquote{font-family:var(--ff-body);font-size:14px;font-weight:300;color:#555;line-height:1.8;font-style:italic;margin-bottom:24px;}
+.test-div{height:1px;background:var(--border);margin-bottom:20px;}
+.author{display:flex;gap:12px;align-items:center;}
+.avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,207,255,0.15),rgba(0,207,255,0.05));
+  border:1px solid rgba(0,207,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-mono);font-size:11px;font-weight:700;color:var(--cyan);
+}
+.author .name{font-family:var(--ff-body);font-size:13px;font-weight:600;color:var(--dark);}
+.author .role{font-family:var(--ff-body);font-size:11px;color:var(--muted);}
+.test-nav{display:none;justify-content:center;gap:14px;margin-top:28px;}
+.test-nav button{
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:#fff;
+  color:var(--dark);font-size:16px;transition:all 0.2s ease;
+}
+.test-nav button:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ===================== FAQ ===================== */
+#faq{background:var(--white);border-top:1px solid var(--border);}
+#faq .wrap{max-width:720px;}
+.faq-head{margin-bottom:40px;text-align:center;}
+.faq-head h2{font-family:var(--ff-display);font-size:clamp(40px,5vw,68px);color:var(--dark);letter-spacing:1px;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{
+  width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:22px 0;font-family:var(--ff-body);font-size:15px;font-weight:400;
+  color:var(--dark);text-align:left;transition:color 0.2s ease;
+}
+.faq-q:hover{color:var(--cyan);}
+.faq-icon{
+  width:24px;height:24px;flex-shrink:0;border-radius:50%;border:1px solid #ddd;
+  display:flex;align-items:center;justify-content:center;font-size:16px;color:#999;
+  transition:transform 0.3s ease,border-color 0.3s ease,color 0.3s ease;
+}
+.faq-item.open .faq-icon{transform:rotate(45deg);border-color:var(--cyan);color:var(--cyan);}
+.faq-item.open .faq-q{color:var(--cyan);}
+.faq-a{max-height:0;overflow:hidden;opacity:0;transition:max-height 0.45s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease;}
+.faq-item.open .faq-a{max-height:320px;opacity:1;}
+.faq-a p{font-family:var(--ff-body);font-size:14px;font-weight:300;color:#666;line-height:1.85;padding-bottom:22px;}
+
+/* ===================== CTA ===================== */
+#cta{background:var(--off-white);border-top:1px solid var(--border);padding:120px var(--pad-x);text-align:center;}
+#cta h2{font-family:var(--ff-display);font-size:clamp(60px,10vw,120px);color:var(--dark);letter-spacing:1px;line-height:1;margin-bottom:24px;}
+#cta p{font-family:var(--ff-body);font-size:15px;font-weight:300;color:#666;max-width:480px;margin:0 auto 32px;line-height:1.8;}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:56px;}
+.countdown{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;}
+.cd-box{background:var(--dark);border-radius:var(--r-md);padding:20px 24px;min-width:90px;}
+.cd-box .num{font-family:var(--ff-display);font-size:48px;color:var(--white);line-height:1;transition:transform 0.15s ease;}
+.cd-box .lbl{font-family:var(--ff-mono);font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-top:6px;}
+.cd-sep{font-family:var(--ff-display);font-size:36px;color:var(--cyan);}
+.cd-box .num.pulse{transform:scale(1.1);}
+
+/* ===================== FOOTER ===================== */
+#footer{background:var(--dark);padding:48px var(--pad-x);}
+#footer .wrap{max-width:1100px;}
+.foot-top{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;padding-bottom:32px;border-bottom:1px solid #222;}
+.foot-logo{font-family:var(--ff-display);font-size:24px;letter-spacing:2px;}
+.foot-logo .b1{color:var(--white);}
+.foot-logo .b2{color:var(--cyan);}
+.foot-links{display:flex;gap:24px;flex-wrap:wrap;}
+.foot-links a{font-family:var(--ff-body);font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.1em;transition:color 0.2s ease;}
+.foot-links a:hover{color:var(--white);}
+.foot-social{display:flex;gap:12px;}
+.foot-social a{
+  width:36px;height:36px;border-radius:50%;border:1px solid #333;
+  display:flex;align-items:center;justify-content:center;color:#666;font-size:13px;
+  transition:all 0.2s ease;
+}
+.foot-social a:hover{border-color:var(--cyan);color:var(--cyan);}
+.foot-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:24px;}
+.foot-bottom span{font-family:var(--ff-mono);font-size:10px;color:#444;}
+
+/* ===================== REVEAL ===================== */
+.reveal{opacity:0;transform:translateY(28px);}
+.reveal.in{opacity:1;transform:none;transition:opacity 0.75s ease,transform 0.75s var(--ease-out);}
+.reveal-left{opacity:0;transform:translateX(-40px);}
+.reveal-left.in{opacity:1;transform:none;transition:opacity 0.8s ease,transform 0.8s var(--ease-out);}
+.reveal-right{opacity:0;transform:translateX(40px);}
+.reveal-right.in{opacity:1;transform:none;transition:opacity 0.8s ease,transform 0.8s var(--ease-out) 0.2s;}
+
+/* ===================== KEYFRAMES ===================== */
+@keyframes slideUp{to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+@keyframes fade{to{opacity:1;}}
+@keyframes drawLine{to{width:60px;}}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes float{0%{transform:translateY(0) rotate(-1.5deg);}50%{transform:translateY(-22px) rotate(1.5deg);}100%{transform:translateY(0) rotate(-1.5deg);}}
+@keyframes pulse{0%{box-shadow:0 0 0 4px rgba(0,207,255,0.15),0 0 14px rgba(0,207,255,0.4),0 0 0 0 rgba(0,207,255,0.4);}70%{box-shadow:0 0 0 4px rgba(0,207,255,0.15),0 0 14px rgba(0,207,255,0.4),0 0 0 8px rgba(0,207,255,0);}100%{box-shadow:0 0 0 4px rgba(0,207,255,0.15),0 0 14px rgba(0,207,255,0.4),0 0 0 0 rgba(0,207,255,0);}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) rotate(45deg) translateY(0);}50%{transform:translateX(-50%) rotate(45deg) translateY(8px);}}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:900px){
+  .section{padding:var(--pad-y-tablet) var(--pad-x);}
+  #product,#about,#tokenomics,#roadmap,#testimonials,#faq{padding:var(--pad-y-tablet) var(--pad-x);}
+  .product-grid{grid-template-columns:1fr;gap:48px;}
+  .can-col{order:-1;}
+  .about-grid{grid-template-columns:1fr;gap:40px;}
+  .token-grid{grid-template-columns:repeat(2,1fr);}
+  .test-grid{grid-template-columns:1fr;}
+  .foot-top,.foot-bottom{flex-direction:column;text-align:center;justify-content:center;}
+}
+@media (max-width:600px){
+  .section{padding:var(--pad-y-mobile) var(--pad-x);}
+  #product,#about,#tokenomics,#roadmap,#testimonials,#faq{padding:var(--pad-y-mobile) var(--pad-x);}
+  #cta{padding:var(--pad-y-mobile) var(--pad-x);}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .hero-title .line1{font-size:clamp(64px,16vw,90px);}
+  .token-grid{grid-template-columns:repeat(2,1fr);}
+  .timeline{padding-left:32px;}
+  .cd-box .num{font-size:36px;}
+  .cd-box{padding:14px 16px;min-width:70px;}
+  .cd-sep{font-size:28px;}
+  .test-grid{grid-template-columns:1fr;}
+  .test-grid.carousel .test-card{display:none;}
+  .test-grid.carousel .test-card.active{display:block;}
+  .test-nav{display:flex;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation:none !important;
+    transition:none !important;
+    scroll-behavior:auto !important;
+  }
+  .reveal,.reveal-left,.reveal-right{opacity:1 !important;transform:none !important;}
+  .hero-eyebrow,.hero-title .line1,.hero-title .line2,.hero-sub,.hero-cta,.partners{opacity:1 !important;transform:none !important;}
+  .hero-divider{width:60px !important;}
+  #hero .bg,#product .bg{background-attachment:scroll;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- ===================== NAV ===================== -->
+<nav id="nav">
+  <a href="#hero" class="logo"><span class="b1">HYDRO</span><span class="b2">FLOW</span></a>
+  <ul class="nav-links">
+    <li><a href="#hero" data-target="hero">Home</a></li>
+    <li><a href="#about" data-target="about">About</a></li>
+    <li><a href="#testimonials" data-target="testimonials">Testimonials</a></li>
+    <li><a href="#faq" data-target="faq">FAQ</a></li>
+    <li><a href="#cta" data-target="cta">Coming Soon</a></li>
+  </ul>
+  <button class="btn-buy">Buy $HYDRO</button>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+<div id="mobile-menu">
+  <a href="#hero">Home</a>
+  <a href="#about">About</a>
+  <a href="#testimonials">Testimonials</a>
+  <a href="#faq">FAQ</a>
+  <a href="#cta">Coming Soon</a>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<header id="hero">
+  <div class="bg" id="hero-bg"></div>
+  <div class="overlay"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">World's First Tokenized Energy Drink</span>
+    <h1 class="hero-title">
+      <span class="line1">HYDROFLOW</span>
+      <span class="line2">TOKENIZING HYDRATION</span>
+    </h1>
+    <div class="hero-divider"></div>
+    <p class="hero-sub">Pure. Refreshing. Blockchain-Powered.</p>
+    <div class="hero-cta">
+      <a href="#product" class="btn btn-primary">Discover More</a>
+      <a href="#cta" class="btn btn-ghost">Buy $HYDRO</a>
+    </div>
+    <div class="partners">
+      <img src="https://cdn.prod.website-files.com/6649e26c9fdc8739cefdc48e/6649fe6e46e4c0897ba16dad_chainlink.svg" alt="Chainlink" />
+      <img src="https://cdn.prod.website-files.com/6649e26c9fdc8739cefdc48e/6649fe829a33b78ff150781b_tron.svg" alt="TRON" />
+      <img src="https://cdn.prod.website-files.com/6649e26c9fdc8739cefdc48e/6649ff0cc51fe67c684cfad9_bnb.svg" alt="BNB" />
+      <img src="https://cdn.prod.website-files.com/6649e26c9fdc8739cefdc48e/6649ff13b42127ac50ff5b0c_okx.svg" alt="OKX" />
+    </div>
+  </div>
+  <div class="scroll-ind" id="scrollInd"></div>
+</header>
+
+<!-- ===================== MARQUEE ===================== -->
+<div class="marquee">
+  <div class="strip-track" id="strip"></div>
+</div>
+
+<!-- ===================== PRODUCT ===================== -->
+<section id="product">
+  <div class="bg" id="product-bg"></div>
+  <div class="overlay"></div>
+  <div class="wrap">
+    <div class="product-grid">
+      <div class="product-text reveal-left">
+        <span class="eyebrow">Pre-Trade Energy — Solana Splash</span>
+        <h2>THE DRINK BUILT FOR TRADERS</h2>
+        <p>HydroFlow Solana Splash is a 330ml zero-sugar energy drink engineered for the people who live on-chain. Clean, natural caffeine for sharp focus during volatile sessions — without the crash. Every can carries a unique QR code: scan it, and $HYDRO lands in your wallet.</p>
+        <p>No artificial sweeteners, no compromises. Just refreshing hydration tuned for traders, builders and the wider DeFi community.</p>
+        <div class="ingredients">
+          <span class="lbl">Ingredients</span>
+          <div class="tags">
+            <span class="tag">Caffeine</span>
+            <span class="tag">Natural Flavor</span>
+            <span class="tag">Magnesium Citrate</span>
+            <span class="tag">Sodium Citrate</span>
+            <span class="tag">Stevia Extract</span>
+          </div>
+        </div>
+      </div>
+      <div class="can-col reveal-right">
+        <div class="can-wrap">
+          <div class="can-cap"></div>
+          <div class="can-body">
+            <div class="can-label">
+              <span class="brand">HYDRO</span>
+              <span class="sub">Solana Splash</span>
+              <span class="line"></span>
+              <span class="vol">330ml · Zero Sugar</span>
+              <div class="qr"></div>
+            </div>
+          </div>
+          <div class="can-cap bottom"></div>
+        </div>
+        <div class="can-shadow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABOUT ===================== -->
+<section id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <span class="eyebrow">About HydroFlow</span>
+        <h2>WELCOME TO HYDROFLOW WHERE WATER MEETS <span class="accent">INNOVATION</span></h2>
+        <p>HydroFlow was born from a simple idea: hydration should reward you. We merged premium, zero-sugar energy drinks with the transparency of the Solana blockchain to create a product that's as smart as the community it serves.</p>
+        <p>Every can is more than a drink — it's a gateway to the $HYDRO ecosystem. Scan, sip and earn while you build, trade and grow alongside a global Web3 community that values both performance and proof.</p>
+      </div>
+      <div class="reveal">
+        <div class="about-img"><span>HYDROFLOW</span></div>
+        <div class="scan-card">
+          <div class="scan-txt">SCAN IT,<span>TRADE IT</span></div>
+          <a href="#cta">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TOKENOMICS ===================== -->
+<section id="tokenomics">
+  <div class="wrap">
+    <div class="token-head reveal">
+      <span class="eyebrow">Tokenomics</span>
+      <h2>BUILT FOR <span class="accent">LONG-TERM</span> GROWTH</h2>
+    </div>
+    <div class="token-grid reveal">
+      <div class="token-cell">
+        <div class="pct" data-target="40" style="color:var(--cyan);">0%</div>
+        <div class="name">Community</div>
+        <div class="desc">Rewards, scan-to-earn drops and holder incentives.</div>
+      </div>
+      <div class="token-cell">
+        <div class="pct" data-target="25" style="color:var(--gold);">0%</div>
+        <div class="name">Liquidity</div>
+        <div class="desc">Locked liquidity for stable, healthy markets.</div>
+      </div>
+      <div class="token-cell">
+        <div class="pct" data-target="20" style="color:#a855f7;">0%</div>
+        <div class="name">Development</div>
+        <div class="desc">Product, platform and ecosystem engineering.</div>
+      </div>
+      <div class="token-cell">
+        <div class="pct" data-target="15" style="color:#22c55e;">0%</div>
+        <div class="name">Marketing</div>
+        <div class="desc">Partnerships, KOLs and global brand growth.</div>
+      </div>
+    </div>
+    <div class="chain-pills reveal">
+      <span class="pill">Solana</span>
+      <span class="pill">SPL Token</span>
+      <span class="pill">On-Chain QR</span>
+      <span class="pill">Audited Contract</span>
+      <span class="pill">DeFi Ready</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROADMAP ===================== -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="road-head reveal">
+      <span class="eyebrow">Roadmap</span>
+      <h2>THE <span class="accent">JOURNEY</span> AHEAD</h2>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="timeline-line-bg"></div>
+      <div class="timeline-line" id="timeline-line"></div>
+
+      <div class="milestone done reveal">
+        <span class="dot done"></span>
+        <span class="phase">Q2 2024 — Complete</span>
+        <h3>Foundation</h3>
+        <p>Smart contract deployed and audited, brand identity launched, and the $HYDRO token went live on Solana.</p>
+        <div class="m-tags"><span class="m-tag">Contract Live</span><span class="m-tag">Audit Passed</span><span class="m-tag">Brand Launch</span></div>
+      </div>
+
+      <div class="milestone current reveal">
+        <span class="dot current"></span>
+        <span class="phase">Q3–Q4 2024 — In Progress</span>
+        <h3>Pre-Sale &amp; Community</h3>
+        <p>KOL partnerships, exchange listing groundwork, and our first 500 holder sample cans shipping to early supporters.</p>
+        <div class="m-tags"><span class="m-tag">KOL Partners</span><span class="m-tag">Listings</span><span class="m-tag">500 Samples</span></div>
+      </div>
+
+      <div class="milestone upcoming reveal">
+        <span class="dot upcoming"></span>
+        <span class="phase">Q1 2025 — Upcoming</span>
+        <h3>Retail Launch</h3>
+        <p>HydroFlow hits retail shelves across the UAE, UK and US, with scan-to-earn going fully live in stores.</p>
+        <div class="m-tags"><span class="m-tag">Retail UAE/UK/US</span><span class="m-tag">Scan-to-Earn</span></div>
+      </div>
+
+      <div class="milestone upcoming reveal">
+        <span class="dot upcoming"></span>
+        <span class="phase">Q3 2025 — Upcoming</span>
+        <h3>Global Expansion</h3>
+        <p>Expansion into 10+ markets, launch of the DeFi staking vault, and new flavours added to the lineup.</p>
+        <div class="m-tags"><span class="m-tag">10+ Markets</span><span class="m-tag">DeFi Vault</span><span class="m-tag">New Flavours</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section id="testimonials">
+  <div class="wrap">
+    <div class="test-head reveal">
+      <span class="eyebrow">Testimonials</span>
+      <h2>BECOME PART OF OUR COMMUNITY</h2>
+    </div>
+    <div class="test-grid carousel" id="testGrid">
+      <div class="test-card active reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“HydroFlow keeps me locked in through long trading sessions. Clean energy, zero crash — and earning $HYDRO from a can I'd buy anyway just feels like free upside.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">JC</div><div><div class="name">James Carter</div><div class="role">DeFi Trader</div></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“Finally a drink that gets crypto. The scan-to-earn flow is seamless and the taste is genuinely good. It's become part of my daily build routine.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">EM</div><div><div class="name">Ethan Miller</div><div class="role">Web3 Developer</div></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“Zero sugar, real focus, and a token that actually has utility behind it. HydroFlow nailed the balance between product and protocol.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">LB</div><div><div class="name">Lucas Bennett</div><div class="role">Crypto Analyst</div></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“I was skeptical about a tokenized drink, but the transparency won me over. Every can is verifiable on-chain and the energy is the real deal.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">OH</div><div><div class="name">Oliver Hayes</div><div class="role">NFT Collector</div></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“The community around $HYDRO is what hooked me. Great drink, smart rewards, and a team that ships. This is how Web3 brands should be built.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">RT</div><div><div class="name">Ryan Thompson</div><div class="role">DAO Contributor</div></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>“Light, refreshing and it keeps me sharp without the jitters. Stacking $HYDRO while staying hydrated is a no-brainer for anyone in the space.”</blockquote>
+        <div class="test-div"></div>
+        <div class="author"><div class="avatar">NC</div><div><div class="name">Nathan Collins</div><div class="role">Solana Builder</div></div></div>
+      </div>
+    </div>
+    <div class="test-nav">
+      <button id="testPrev" aria-label="Previous">‹</button>
+      <button id="testNext" aria-label="Next">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq">
+  <div class="wrap">
+    <div class="faq-head reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>FREQUENTLY ASKED QUESTIONS</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q">What is the incubation program?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Our incubation program supports early-stage founders from idea to launch, providing hands-on guidance, ecosystem connections and the resources needed to build a viable Web3 product from the ground up.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What is the acceleration program?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>The acceleration program helps existing projects scale faster. We offer strategic capital, go-to-market support and access to our partner network to accelerate growth and adoption.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Which verticals are you investing in?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>We focus on DeFi, consumer Web3, infrastructure and tokenized real-world products — areas where blockchain transparency creates genuine value for users and communities.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What is your investment thesis?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>We back teams building products with real-world utility and sustainable token models. We believe the next wave of adoption comes from blending great consumer experiences with on-chain ownership.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">In which stages are you investing?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>We invest from pre-seed through early growth, partnering at the stage where our operational support and network can have the greatest impact on a project's trajectory.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Who should apply for the acceleration and incubation programs?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Ambitious founders and teams building in the Web3 space — whether you're refining an idea or scaling a live product — who are aligned with our vision of transparent, community-driven growth.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section id="cta">
+  <span class="eyebrow reveal">Coming Soon</span>
+  <h2 class="reveal">GET IN <span class="accent">EARLY.</span></h2>
+  <p class="reveal">The $HYDRO presale is approaching. Join the community now and be among the first to drink, scan and earn when HydroFlow launches.</p>
+  <div class="cta-btns reveal">
+    <a href="#" class="btn btn-primary">Buy $HYDRO</a>
+    <a href="#" class="btn btn-ghost-dark">Join Community</a>
+  </div>
+  <div class="countdown reveal" id="countdown">
+    <div class="cd-box"><div class="num" id="cd-days">00</div><div class="lbl">Days</div></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-box"><div class="num" id="cd-hours">00</div><div class="lbl">Hours</div></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-box"><div class="num" id="cd-mins">00</div><div class="lbl">Minutes</div></div>
+    <span class="cd-sep">:</span>
+    <div class="cd-box"><div class="num" id="cd-secs">00</div><div class="lbl">Seconds</div></div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer id="footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a href="#hero" class="foot-logo"><span class="b1">HYDRO</span><span class="b2">FLOW</span></a>
+      <ul class="foot-links">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#cta">Coming Soon</a></li>
+      </ul>
+      <div class="foot-social">
+        <a href="#" aria-label="Twitter/X">X</a>
+        <a href="#" aria-label="Telegram">T</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2024 HydroFlow. All rights reserved.</span>
+      <span>$HYDRO · Solana Blockchain</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- MARQUEE BUILD ---------- */
+  (function(){
+    var items = ["Pre-Trade Energy","Blockchain Powered","Zero Sugar","Scan & Earn","Solana Ecosystem","Natural Caffeine","On-Chain Transparency","Magnesium Citrate"];
+    var strip = document.getElementById('strip');
+    var html = "";
+    for(var r=0;r<2;r++){
+      for(var i=0;i<items.length;i++){
+        html += '<span class="strip-item">'+items[i]+'</span>';
+      }
+    }
+    strip.innerHTML = html;
+  })();
+
+  /* ---------- NAV SCROLL STATE ---------- */
+  var nav = document.getElementById('nav');
+  var scrollInd = document.getElementById('scrollInd');
+  var heroBg = document.getElementById('hero-bg');
+  var productBg = document.getElementById('product-bg');
+  var product = document.getElementById('product');
+  var progress = document.getElementById('progress');
+  var timeline = document.getElementById('timeline');
+  var timelineLine = document.getElementById('timeline-line');
+
+  function onScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+
+    if(y > 60){ nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); }
+
+    // scroll indicator hide
+    if(y > 100){ scrollInd.classList.add('hide'); } else { scrollInd.classList.remove('hide'); }
+
+    // progress bar
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (docH > 0 ? (y/docH)*100 : 0) + '%';
+
+    // parallax (skip if reduced motion)
+    if(!reduceMotion){
+      heroBg.style.backgroundPositionY = (y * 0.4) + 'px';
+      if(product){
+        var pTop = product.offsetTop;
+        productBg.style.backgroundPositionY = ((y - pTop) * 0.3) + 'px';
+      }
+    }
+
+    // timeline line progress
+    if(timeline && timelineLine){
+      var rect = timeline.getBoundingClientRect();
+      var secTop = rect.top + y;
+      var secH = timeline.offsetHeight;
+      var prog = (y + window.innerHeight*0.5 - secTop) / secH;
+      prog = Math.max(0, Math.min(1, prog));
+      timelineLine.style.height = (prog * 100) + '%';
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+  onScroll();
+
+  // show scroll indicator after load
+  window.addEventListener('load', function(){ scrollInd.classList.add('show'); });
+
+  /* ---------- HAMBURGER / MOBILE MENU ---------- */
+  var hamburger = document.getElementById('hamburger');
+  var mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', function(){
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
+
+  /* ---------- SMOOTH SCROLL WITH OFFSET ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      var id = link.getAttribute('href');
+      if(id === '#' || id.length < 2) return;
+      var target = document.querySelector(id);
+      if(!target) return;
+      e.preventDefault();
+      var top = target.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  });
+
+  /* ---------- SCROLL REVEAL ---------- */
+  var revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  if('IntersectionObserver' in window){
+    var groups = {};
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var el = entry.target;
+          // stagger based on sibling index
+          var parent = el.parentNode;
+          var sibs = Array.prototype.filter.call(parent.children, function(c){
+            return c.classList.contains('reveal') || c.classList.contains('reveal-left') || c.classList.contains('reveal-right');
+          });
+          var idx = sibs.indexOf(el);
+          if(!reduceMotion && idx > 0){ el.style.transitionDelay = (idx * 90) + 'ms'; }
+          el.classList.add('in');
+          obs.unobserve(el);
+        }
+      });
+    }, { threshold:0.12, rootMargin:'0px 0px -40px 0px' });
+    revealEls.forEach(function(el){ obs.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  /* ---------- ACTIVE NAV HIGHLIGHT ---------- */
+  var sectionMap = { hero:'hero', about:'about', testimonials:'testimonials', faq:'faq', cta:'cta' };
+  var navLinks = document.querySelectorAll('.nav-links a');
+  if('IntersectionObserver' in window){
+    var navObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting && entry.intersectionRatio >= 0.5){
+          var id = entry.target.id;
+          navLinks.forEach(function(l){
+            l.classList.toggle('active', l.getAttribute('data-target') === id);
+          });
+        }
+      });
+    }, { threshold:0.5 });
+    Object.keys(sectionMap).forEach(function(k){
+      var s = document.getElementById(k);
+      if(s) navObs.observe(s);
+    });
+  }
+
+  /* ---------- TOKENOMICS COUNTERS ---------- */
+  function animateCounter(el){
+    var target = parseInt(el.getAttribute('data-target'), 10);
+    if(reduceMotion){ el.textContent = target + '%'; return; }
+    var duration = 1500, start = null;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts - start)/duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target) + '%';
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var counters = document.querySelectorAll('.token-cell .pct');
+  if('IntersectionObserver' in window){
+    var cObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          animateCounter(entry.target);
+          cObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold:0.4 });
+    counters.forEach(function(c){ cObs.observe(c); });
+  } else {
+    counters.forEach(animateCounter);
+  }
+
+  /* ---------- FAQ ACCORDION ---------- */
+  var faqItems = document.querySelectorAll('.faq-item');
+  faqItems.forEach(function(item){
+    var btn = item.querySelector('.faq-q');
+    btn.addEventListener('click', function(){
+      var isOpen = item.classList.contains('open');
+      faqItems.forEach(function(i){ i.classList.remove('open'); });
+      if(!isOpen) item.classList.add('open');
+    });
+  });
+
+  /* ---------- TESTIMONIAL CAROUSEL (mobile) ---------- */
+  var cards = document.querySelectorAll('#testGrid .test-card');
+  var current = 0;
+  function showCard(idx){
+    cards.forEach(function(c,i){ c.classList.toggle('active', i === idx); });
+  }
+  var prev = document.getElementById('testPrev');
+  var next = document.getElementById('testNext');
+  if(prev && next){
+    prev.addEventListener('click', function(){ current = (current - 1 + cards.length) % cards.length; showCard(current); });
+    next.addEventListener('click', function(){ current = (current + 1) % cards.length; showCard(current); });
+  }
+
+  /* ---------- COUNTDOWN ---------- */
+  var launch = new Date().getTime() + 90 * 24 * 60 * 60 * 1000;
+  var elDays = document.getElementById('cd-days');
+  var elHours = document.getElementById('cd-hours');
+  var elMins = document.getElementById('cd-mins');
+  var elSecs = document.getElementById('cd-secs');
+  var lastSecs = null;
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function setNum(el, val){
+    var s = pad(val);
+    if(el.textContent !== s){
+      el.textContent = s;
+      if(!reduceMotion){
+        el.classList.add('pulse');
+        setTimeout(function(){ el.classList.remove('pulse'); }, 150);
+      }
+    }
+  }
+  function updateTimer(){
+    var now = new Date().getTime();
+    var dist = launch - now;
+    if(dist < 0) dist = 0;
+    var d = Math.floor(dist / (1000*60*60*24));
+    var h = Math.floor((dist % (1000*60*60*24)) / (1000*60*60));
+    var m = Math.floor((dist % (1000*60*60)) / (1000*60));
+    var s = Math.floor((dist % (1000*60)) / 1000);
+    setNum(elDays, d); setNum(elHours, h); setNum(elMins, m); setNum(elSecs, s);
+  }
+  updateTimer();
+  setInterval(updateTimer, 1000);
+
+})();
+</script>
+</body>
+</html>
